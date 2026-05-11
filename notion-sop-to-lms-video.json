@@ -1,0 +1,418 @@
+{
+  "name": "Ozor 03 — Notion SOP Edited → LMS Training Video Refresh",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "a90a6fab-5278-42f0-b3df-eec2770ada76",
+      "name": "Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "35d2b1fb-9cde-8088-8645-fc907ca6b3c3",
+          "mode": "list",
+          "cachedResultName": "Document Hub",
+          "cachedResultUrl": "https://www.notion.so/35d2b1fb9cde80888645fc907ca6b3c3"
+        },
+        "limit": 1,
+        "options": {}
+      },
+      "id": "b8a219e4-15db-4a72-a368-8b486e1ea998",
+      "name": "Notion — Recently Edited SOPs",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        -144
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "70PVceLP2PyCKJGC",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "sourceUrl": "https://www.ozor.ai/",
+        "analyzePrompt": "={{ $json.text }}"
+      },
+      "id": "85d61727-4223-4404-816f-3dcc31f76c48",
+      "name": "Ozor — Analyze Notion Page",
+      "type": "n8n-nodes-ozor.ozor",
+      "typeVersion": 1,
+      "position": [
+        0,
+        80
+      ],
+      "credentials": {
+        "ozorApi": {
+          "id": "6BY1LGOZflLVGn4o",
+          "name": "Ozor account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "operation": "generatePlan",
+        "planId": "={{ $json.plan.planId }}"
+      },
+      "id": "bdb001d1-9ba2-4062-9602-54bb3ab94094",
+      "name": "Ozor — Generate From Plan",
+      "type": "n8n-nodes-ozor.ozor",
+      "typeVersion": 1,
+      "position": [
+        256,
+        80
+      ],
+      "credentials": {
+        "ozorApi": {
+          "id": "6BY1LGOZflLVGn4o",
+          "name": "Ozor account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "block",
+        "operation": "getAll",
+        "blockId": {
+          "__rl": true,
+          "value": "={{ $json.url }}",
+          "mode": "url"
+        }
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        -144
+      ],
+      "id": "6b283b85-fdb5-4ae3-90c6-5af6cb69167b",
+      "name": "Get many child blocks",
+      "credentials": {
+        "notionApi": {
+          "id": "70PVceLP2PyCKJGC",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const blocks = $input.all().map((item) => item.json);\nlet text = \"I have put my company url for context about my brand. Make the video about the following informatiion for a blog post I wrote: \";\n\nblocks.forEach((block) => {\n  if (block.content) {\n    text += block.content + \"\\n\";\n  }\n  if (block.image?.file?.url) {\n    text += block.image.file.url + \"\\n\";\n  }\n});\n\nreturn [{ json: { text }, pairedItem: blocks.map((_, index) => index) }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        -144
+      ],
+      "id": "4f53b6f5-979f-45a6-a439-e7e4cf779f90",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "export",
+        "videoId": "={{ $json.projectId }}",
+        "isPublic": true,
+        "waitForExportSingle": true
+      },
+      "type": "n8n-nodes-ozor.ozor",
+      "typeVersion": 1,
+      "position": [
+        512,
+        80
+      ],
+      "id": "30465de5-53c2-4ff7-96aa-a58ce3a75230",
+      "name": "Export a video",
+      "credentials": {
+        "ozorApi": {
+          "id": "6BY1LGOZflLVGn4o",
+          "name": "Ozor account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "block",
+        "blockId": {
+          "__rl": true,
+          "value": "={{ $('Get many child blocks').all()[0].json.parent.page_id }}",
+          "mode": "id"
+        },
+        "blockUi": {
+          "blockValues": [
+            {
+              "type": "image",
+              "url": "={{ $json.downloadUrl }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        80
+      ],
+      "id": "dfb0d115-2e0d-4568-ab48-69a71395c9cc",
+      "name": "Append a block",
+      "credentials": {
+        "notionApi": {
+          "id": "70PVceLP2PyCKJGC",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🎬 WORKFLOW OVERVIEW\n**Ozor 03 — Notion SOP Edited → LMS Training Video Refresh**\n\nThis workflow automatically monitors a Notion 'Document Hub' database for recently edited SOPs (Standard Operating Procedures) and regenerates an updated LMS training video using Ozor AI — then appends the new video back to the original Notion page.\n\n### 🔄 High-Level Flow\n1. **Schedule Trigger** (every 15 min)\n2. **Fetch** the most recently edited SOP from Notion\n3. **Read** all child blocks of that page\n4. **Compile** content into a single prompt (JS)\n5. **Analyze** the document with Ozor AI → produces a video plan\n6. **Generate** the video project from that plan\n7. **Export** the rendered 1080p MP4\n8. **Append** the new video link back into the Notion page\n\n### 🎯 Use Case\nKeeps internal LMS training videos in sync with the source-of-truth SOPs in Notion — without anyone manually re-rendering videos every time documentation changes.\n\n## ⚠️ REQUIREMENTS\n- **Notion credential** with read + write access to Document Hub\n- **Ozor account** credential configured in n8n\n- **Active network** access to Notion API, Ozor API & Google Cloud Storage\n- **Execution time:** ~5–10 min per run (video export is the bottleneck)\n- **Schedule:** Every 15 min — set to non-overlap with export duration",
+        "height": 1200,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -544,
+        -464
+      ],
+      "typeVersion": 1,
+      "id": "2fd5f9ec-9040-474b-838c-4b9a4222aede",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## 🗃️ NODE 2 — Notion: Recently Edited SOPs\n\nFetches the single most recently edited SOP page from the Document Hub Notion database. Returns ID, URL, name, timestamps, category, and doc name properties.\n",
+        "height": 464,
+        "width": 224
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -464
+      ],
+      "id": "4c201ee9-5edb-4060-8ba9-0f13119e480e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## 🧠 NODE 5 — Ozor: Analyze Notion Page\n\nThis is where the AI reads the SOP and figures out what the video should look like.\n\nIt takes all the text and images from the Notion page and sends them to Ozor AI. Ozor then creates a **video plan** — deciding things like layout, colors, tone, and structure.\n\nThink of it as the **\"creative brief\"** step: the AI understands the content and plans the video before building anything.",
+        "height": 688,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        48
+      ],
+      "id": "1e07564e-9e19-43d1-be47-5e1cb6566ecf",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## 📌 NODE 8 — Append a Block\n**Resource:** Block · **Operation:** Append After\n**Target Block ID:**\n`{{ $('Get many child blocks').all()[0].json.parent.page_id }}`\n→ Resolves to the Notion Page ID of the original SOP\n**Block Type:** Image\n**Image URL:** `{{ $json.downloadUrl }}`\n→ The Google Cloud Storage MP4 link from Export node\n\nAppends the rendered training video as an image block directly at the bottom of the original SOP Notion page, making it permanently accessible to anyone reading the doc.\n\n---\n\n",
+        "height": 736,
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        32
+      ],
+      "id": "873134fd-f531-450a-a775-8ae8d3122e04",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## ⏱️ NODE 1 — Every 15 Minutes\n**Type:** Schedule Trigger\n**Interval:** Every 15 minutes\nKicks off the entire workflow automatically on a fixed schedule. For testing, use \"Execute workflow\" manually on the canvas.",
+        "height": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -464
+      ],
+      "id": "22699364-d2b1-4164-b02c-e29fa8117a5d",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "\n## 📄 NODE 3 — Get Many Child Blocks\n**Resource:** Block · **Operation:** Get Child Blocks\n**Block:** By URL → `{{ $json.url }}` · **Limit:** 50\nReads all content blocks (headings, paragraphs, images) from the SOP page URL. Returns up to 50 blocks with type, content text, and image file URLs.\n",
+        "height": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -464
+      ],
+      "id": "55c136fa-2e46-4f3c-9f21-faf1eb9c53d8",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## 🔧 NODE 4 — Code in JavaScript\n**Mode:** Run Once for All Items\nLoops through all blocks and builds a single text string:\n- Appends `block.content` (text blocks) line by line\n- Appends `block.image.file.url` (image URLs) line by line\n- Prepends company context sentence for Ozor AI branding\n",
+        "height": 464,
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        -464
+      ],
+      "id": "1a73c75e-6b2d-4205-ae9b-75f223a3c997",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## 🎬 NODE 6 — Ozor: Generate From Plan\n\nThis is where Ozor **actually builds the video** based on the plan created in the previous step.\n\nIt takes the plan ID and starts producing the video project — assembling scenes, applying the design style, adding motion and text. It waits until the video is 100% ready before moving on.\n\nThink of it as the **\"production\"** step: the plan becomes a real video.",
+        "height": 704
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        192,
+        48
+      ],
+      "typeVersion": 1,
+      "id": "024d8ca8-210a-4edb-b1cf-7876eec64021",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## 📤 NODE 7 — Export a Video\n\nThis step **exports the finished video** as a downloadable MP4 file.\n\nOnce the video is built, Ozor renders it at 1080p quality and makes it publicly accessible. The workflow waits here (up to 5 minutes) until the export is fully complete.\n\nThe result is a **direct download link** to the final video file, which gets passed to the next step to be saved back into Notion.",
+        "height": 720
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        448,
+        32
+      ],
+      "typeVersion": 1,
+      "id": "e9e5ce91-0441-478b-acc8-45aae824d37c",
+      "name": "Sticky Note8"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every 15 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Notion — Recently Edited SOPs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion — Recently Edited SOPs": {
+      "main": [
+        [
+          {
+            "node": "Get many child blocks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ozor — Analyze Notion Page": {
+      "main": [
+        [
+          {
+            "node": "Ozor — Generate From Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ozor — Generate From Plan": {
+      "main": [
+        [
+          {
+            "node": "Export a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many child blocks": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Ozor — Analyze Notion Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Export a video": {
+      "main": [
+        [
+          {
+            "node": "Append a block",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "cb9b4143-3a3d-494a-8172-c20e0787cba4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "56b91440fc9cc6cd547e3d06f671fedfad8d7f4c0043df012685d15aed337977"
+  },
+  "id": "MPDBjJPvjHbekdkb",
+  "tags": [
+    {
+      "updatedAt": "2026-05-11T16:06:19.688Z",
+      "createdAt": "2026-05-11T16:06:19.688Z",
+      "id": "SuifuWS54jd4UEEP",
+      "name": "ozor"
+    }
+  ]
+}
